@@ -1,0 +1,14 @@
+{
+  "games": [
+    {
+      "id": "catur",
+      "name": "Catur",
+      "icon": "♟️",
+      "description": "Permainan catur dua pemain klasik dengan papan 8x8, strategi memindahkan bidak untuk skakmat lawan.",
+      "category": "chess",
+      "path": "catur/",
+      "active": true,
+      "addedAt": "2026-10-08T12:12:36.209Z"
+    }
+  ]
+}
