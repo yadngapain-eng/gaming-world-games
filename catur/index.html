@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>♟️ Catur HTML - Dua Pemain</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: linear-gradient(145deg, #2b2b2b 0%, #1f1f1f 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 16px;
+        }
+        .game-container {
+            background: #2e2e2e;
+            padding: 24px 24px 28px;
+            border-radius: 42px;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.7), inset 0 1px 4px rgba(255, 255, 255, 0.1);
+        }
+        .board-wrapper {
+            display: grid;
+            grid-template-columns: 32px 1fr;
+            gap: 6px;
+        }
+        .rank-labels {
+            display: grid;
+            grid-template-rows: repeat(8, 1fr);
+            gap: 0;
+            align-items: center;
+            justify-items: center;
+            color: #b0b0b0;
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 1px;
+            padding: 4px 0;
+        }
+        .board-and-files {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 68px);
+            grid-template-rows: repeat(8, 68px);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 0 3px #3a3a3a, 0 12px 18px rgba(0, 0, 0, 0.6);
+        }
+        .square {
+            width: 68px;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 46px;
+            line-height: 1;
+            cursor: pointer;
+            transition: background 0.1s ease, box-shadow 0.1s ease;
+            position: relative;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .square.light {
+            background: #f0e6d2;
+            color: #2e2e2e;
+        }
+        .square.dark {
+            background: #7a5c3e;
+            color: #f0e6d2;
+        }
+        .square.selected {
+            box-shadow: inset 0 0 0 5px #f5d742;
+        }
+        .square.highlight {
+            box-shadow: inset 0 0 0 5px #8bc34a;
+        }
+        .square.check {
+            box-shadow: inset 0 0 0 5px #e53935;
+        }
+        .square.legal-move::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(80, 200, 80, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .square.legal-capture::after {
+            content: '';
+            position: absolute;
+            width: 58px;
+            height: 58px;
+            background: rgba(220, 60, 60, 0.5);
+            border-radius: 12px;
+            pointer-events: none;
+            border: 3px solid rgba(255, 80, 80, 0.8);
+        }
+        .files {
+            display: grid;
+            grid-template-columns: repeat(8, 68px);
+            justify-items: center;
+            color: #b0b0b0;
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 1px;
+            padding-left: 38px;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 0 8px;
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+        .turn-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #1e1e1e;
+            padding: 8px 20px;
+            border-radius: 40px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .turn-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #f0e6d2;
+            border: 2px solid #aaa;
+            transition: background 0.2s;
+        }
+        .turn-dot.black {
+            background: #2e2e2e;
+            border-color: #666;
+        }
+        .reset-btn {
+            background: #3a3a3a;
+            border: none;
+            color: #f0e6d2;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 10px 26px;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #1a1a1a, 0 6px 10px rgba(0,0,0,0.5);
+            transition: all 0.08s ease;
+            letter-spacing: 0.5px;
+        }
+        .reset-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #1a1a1a, 0 6px 10px rgba(0,0,0,0.5);
+        }
+        .winner-message {
+            margin-left: 16px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #f5d742;
+            text-shadow: 0 0 10px rgba(245, 215, 66, 0.5);
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="board-wrapper">
+        <!-- Label baris (rank) -->
+        <div class="rank-labels" id="rankLabels"></div>
+
+        <div class="board-and-files">
+            <!-- Papan catur -->
+            <div class="chessboard" id="chessboard"></div>
+            <!-- Label kolom (file) -->
+            <div class="files" id="fileLabels"></div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div class="turn-indicator">
+            <span id="turnText">Giliran Putih</span>
+            <div class="turn-dot" id="turnDot"></div>
+        </div>
+        <button class="reset-btn" id="resetBtn">🔄 Main Lagi</button>
+        <div class="winner-message" id="winnerMsg"></div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- KONFIGURASI AWAL ----------
+        const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+        const ranks = [8, 7, 6, 5, 4, 3, 2, 1]; // baris atas ke bawah (8 ke 1)
+
+        // Representasi papan: array 8x8, index [baris][kolom] (0,0 = a8)
+        let board = [
+            ['♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜'], // hitam (rank 8)
+            ['♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟'], // pion hitam (rank 7)
+            [null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null],
+            ['♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙'], // pion putih (rank 2)
+            ['♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖']  // putih (rank 1)
+        ];
+
+        // Simbol unicode untuk bidak
+        const pieceSymbols = {
+            // Putih
+            '♔': { type: 'king', color: 'white' },
+            '♕': { type: 'queen', color: 'white' },
+            '♖': { type: 'rook', color: 'white' },
+            '♗': { type: 'bishop', color: 'white' },
+            '♘': { type: 'knight', color: 'white' },
+            '♙': { type: 'pawn', color: 'white' },
+            // Hitam
+            '♚': { type: 'king', color: 'black' },
+            '♛': { type: 'queen', color: 'black' },
+            '♜': { type: 'rook', color: 'black' },
+            '♝': { type: 'bishop', color: 'black' },
+            '♞': { type: 'knight', color: 'black' },
+            '♟': { type: 'pawn', color: 'black' }
+        };
+
+        // State permainan
+        let currentPlayer = 'white'; // 'white' atau 'black'
+        let selectedRow = -1;
+        let selectedCol = -1;
+        let legalMoves = []; // array {row, col, isCapture}
+        let gameOver = false;
+        let winner = null; // 'white', 'black', atau null
+        let checkFlag = false; // untuk highlight raja yang di-scek
+
+        // Elemen DOM
+        const boardEl = document.getElementById('chessboard');
+        const rankLabelsEl = document.getElementById('rankLabels');
+        const fileLabelsEl = document.getElementById('fileLabels');
+        const turnTextEl = document.getElementById('turnText');
+        const turnDotEl = document.getElementById('turnDot');
+        const resetBtn = document.getElementById('resetBtn');
+        const winnerMsgEl = document.getElementById('winnerMsg');
+
+        // ---------- FUNGSI UTILITAS ----------
+        function isWhitePiece(piece) {
+            if (!piece) return false;
+            const info = pieceSymbols[piece];
+            return info && info.color === 'white';
+        }
+
+        function isBlackPiece(piece) {
+            if (!piece) return false;
+            const info = pieceSymbols[piece];
+            return info && info.color === 'black';
+        }
+
+        function getPieceColor(piece) {
+            if (!piece) return null;
+            const info = pieceSymbols[piece];
+            return info ? info.color : null;
+        }
+
+        function getPieceType(piece) {
+            if (!piece) return null;
+            const info = pieceSymbols[piece];
+            return info ? info.type : null;
+        }
+
+        function isOpponentPiece(piece, color) {
+            if (!piece) return false;
+            const pieceColor = getPieceColor(piece);
+            return pieceColor !== null && pieceColor !== color;
+        }
+
+        function inBounds(row, col) {
+            return row >= 0 && row < 8 && col >= 0 && col < 8;
+        }
+
+        // ---------- INISIALISASI TAMPILAN PAPAN ----------
+        function renderBoard() {
+            boardEl.innerHTML = '';
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const square = document.createElement('div');
+                    square.className = `square ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
+                    square.dataset.row = r;
+                    square.dataset.col = c;
+                    const piece = board[r][c];
+                    if (piece) {
+                        square.textContent = piece;
+                    }
+
+                    // Tandai highlight untuk seleksi, legal move, dan cek
+                    if (selectedRow === r && selectedCol === c) {
+                        square.classList.add('selected');
+                    }
+
+                    // Legal move highlight
+                    const move = legalMoves.find(m => m.row === r && m.col === c);
+                    if (move) {
+                        if (move.isCapture) {
+                            square.classList.add('legal-capture');
+                        } else {
+                            square.classList.add('legal-move');
+                        }
+                    }
+
+                    // Highlight raja jika sedang di-scek (check)
+                    if (checkFlag) {
+                        const pieceColor = getPieceColor(piece);
+                        const pieceType = getPieceType(piece);
+                        if (pieceType === 'king' && pieceColor === currentPlayer) {
+                            // Periksa apakah raja benar-benar dalam kondisi skak
+                            if (isKingInCheck(currentPlayer)) {
+                                square.classList.add('check');
+                            }
+                        }
+                    }
+
+                    square.addEventListener('click', onSquareClick);
+                    boardEl.appendChild(square);
+                }
+            }
+
+            // Update label baris & kolom (sekali saja, tapi dipanggil ulang aman)
+            renderLabels();
+
+            // Update UI status
+            updateStatusUI();
+        }
+
+        function renderLabels() {
+            // Rank labels (8 sampai 1 dari atas ke bawah)
+            rankLabelsEl.innerHTML = '';
+            for (let i = 0; i < 8; i++) {
+                const label = document.createElement('div');
+                label.textContent = ranks[i];
+                rankLabelsEl.appendChild(label);
+            }
+            // File labels (a sampai h)
+            fileLabelsEl.innerHTML = '';
+            for (let i = 0; i < 8; i++) {
+                const label = document.createElement('div');
+                label.textContent = files[i];
+                fileLabelsEl.appendChild(label);
+            }
+        }
+
+        function updateStatusUI() {
+            if (gameOver) {
+                if (winner === 'white') {
+                    turnTextEl.textContent = 'Putih Menang!';
+                    turnDotEl.style.background = '#f0e6d2';
+                    turnDotEl.style.borderColor = '#aaa';
+                    winnerMsgEl.textContent = '🏆 Putih menang!';
+                } else if (winner === 'black') {
+                    turnTextEl.textContent = 'Hitam Menang!';
+                    turnDotEl.style.background = '#2e2e2e';
+                    turnDotEl.style.borderColor = '#666';
+                    winnerMsgEl.textContent = '🏆 Hitam menang!';
+                } else {
+                    turnTextEl.textContent = 'Seri!';
+                    turnDotEl.style.background = '#888';
+                    turnDotEl.style.borderColor = '#555';
+                    winnerMsgEl.textContent = '⚖️ Seri!';
+                }
+                return;
+            }
+
+            // Reset winner message
+            winnerMsgEl.textContent = '';
+
+            if (currentPlayer === 'white') {
+                turnTextEl.textContent = 'Giliran Putih';
+                turnDotEl.classList.remove('black');
+                turnDotEl.style.background = '#f0e6d2';
+                turnDotEl.style.borderColor = '#aaa';
+            } else {
+                turnTextEl.textContent = 'Giliran Hitam';
+                turnDotEl.classList.add('black');
+                turnDotEl.style.background = '#2e2e2e';
+                turnDotEl.style.borderColor = '#666';
+            }
+        }
+
+        // ---------- LOGIKA CATUR: GENERATE LEGAL MOVES ----------
+        function getLegalMoves(row, col) {
+            const piece = board[row][col];
+            if (!piece) return [];
+            const color = getPieceColor(piece);
+            if (color !== currentPlayer) return [];
+
+            const type = getPieceType(piece);
+            let moves = [];
+
+            switch (type) {
+                case 'pawn':
+                    moves = getPawnMoves(row, col, color);
+                    break;
+                case 'knight':
+                    moves = getKnightMoves(row, col, color);
+                    break;
+                case 'bishop':
+                    moves = getBishopMoves(row, col, color);
+                    break;
+                case 'rook':
+                    moves = getRookMoves(row, col, color);
+                    break;
+                case 'queen':
+                    moves = getQueenMoves(row, col, color);
+                    break;
+                case 'king':
+                    moves = getKingMoves(row, col, color);
+                    break;
+            }
+
+            // Filter langkah yang membuat raja sendiri skak
+            const safeMoves = [];
+            for (let move of moves) {
+                // Simulasi langkah
+                const originalPiece = board[move.row][move.col];
+                board[move.row][move.col] = piece;
+                board[row][col] = null;
+
+                if (!isKingInCheck(color)) {
+                    safeMoves.push(move);
+                }
+
+                // Batalkan simulasi
+                board[row][col] = piece;
+                board[move.row][move.col] = originalPiece;
+            }
+
+            return safeMoves;
+        }
+
+        // --- Pion ---
+        function getPawnMoves(row, col, color) {
+            const moves = [];
+            const direction = color === 'white' ? -1 : 1; // putih bergerak ke atas (row berkurang)
+            const startRow = color === 'white' ? 6 : 1;
+
+            // Maju satu langkah
+            const forwardRow = row + direction;
+            if (inBounds(forwardRow, col) && !board[forwardRow][col]) {
+                moves.push({ row: forwardRow, col, isCapture: false });
+
+                // Maju dua langkah dari posisi awal
+                if (row === startRow) {
+                    const doubleRow = row + 2 * direction;
+                    if (inBounds(doubleRow, col) && !board[doubleRow][col]) {
+                        moves.push({ row: doubleRow, col, isCapture: false });
+                    }
+                }
+            }
+
+            // Makan diagonal
+            for (const dCol of [-1, 1]) {
+                const newCol = col + dCol;
+                if (inBounds(forwardRow, newCol)) {
+                    const target = board[forwardRow][newCol];
+                    if (target && isOpponentPiece(target, color)) {
+                        moves.push({ row: forwardRow, col: newCol, isCapture: true });
+                    }
+                }
+            }
+
+            return moves;
+        }
+
+        // --- Kuda ---
+        function getKnightMoves(row, col, color) {
+            const moves = [];
+            const offsets = [
+                [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+                [1, -2], [1, 2], [2, -1], [2, 1]
+            ];
+            for (const [dr, dc] of offsets) {
+                const nr = row + dr;
+                const nc = col + dc;
+                if (!inBounds(nr, nc)) continue;
+                const target = board[nr][nc];
+                if (!target) {
+                    moves.push({ row: nr, col: nc, isCapture: false });
+                } else if (isOpponentPiece(target, color)) {
+                    moves.push({ row: nr, col: nc, isCapture: true });
+                }
+            }
+            return moves;
+        }
+
+        // --- Benteng ---
+        function getRookMoves(row, col, color) {
+            return getSlidingMoves(row, col, color, [[1, 0], [-1, 0], [0, 1], [0, -1]]);
+        }
+
+        // --- Gajah ---
+        function getBishopMoves(row, col, color) {
+            return getSlidingMoves(row, col, color, [[1, 1], [1, -1], [-1, 1], [-1, -1]]);
+        }
+
+        // --- Ratu ---
+        function getQueenMoves(row, col, color) {
+            return getSlidingMoves(row, col, color, [
+                [1, 0], [-1, 0], [0, 1], [0, -1],
+                [1, 1], [1, -1], [-1, 1], [-1, -1]
+            ]);
+        }
+
+        // --- Fungsi geser untuk benteng, gajah, ratu ---
+        function getSlidingMoves(row, col, color, directions) {
+            const moves = [];
+            for (const [dr, dc] of directions) {
+                let nr = row + dr;
+                let nc = col + dc;
+                while (inBounds(nr, nc)) {
+                    const target = board[nr][nc];
+                    if (!target) {
+                        moves.push({ row: nr, col: nc, isCapture: false });
+                    } else {
+                        if (isOpponentPiece(target, color)) {
+                            moves.push({ row: nr, col: nc, isCapture: true });
+                        }
+                        break; // terhalang
+                    }
+                    nr += dr;
+                    nc += dc;
+                }
+            }
+            return moves;
+        }
+
+        // --- Raja ---
+        function getKingMoves(row, col, color) {
+            const moves = [];
+            const offsets = [
+                [-1, -1], [-1, 0], [-1, 1],
+                [0, -1], [0, 1],
+                [1, -1], [1, 0], [1, 1]
+            ];
+            for (const [dr, dc] of offsets) {
+                const nr = row + dr;
+                const nc = col + dc;
+                if (!inBounds(nr, nc)) continue;
+                const target = board[nr][nc];
+                if (!target) {
+                    moves.push({ row: nr, col: nc, isCapture: false });
+                } else if (isOpponentPiece(target, color)) {
+                    moves.push({ row: nr, col: nc, isCapture: true });
+                }
+            }
+            // Catatan: Rokade (castling) tidak diimplementasikan untuk kesederhanaan
+            return moves;
+        }
+
+        // ---------- DETEKSI SKAK (CHECK) ----------
+        function isKingInCheck(color) {
+            // Cari posisi raja
+            let kingRow = -1, kingCol = -1;
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const piece = board[r][c];
+                    if (piece && getPieceType(piece) === 'king' && getPieceColor(piece) === color) {
+                        kingRow = r;
+                        kingCol = c;
+                        break;
+                    }
+                }
+                if (kingRow !== -1) break;
+            }
+            if (kingRow === -1) return false; // tidak ada raja? (tidak seharusnya)
+
+            // Cek apakah ada bidak lawan yang bisa menyerang raja
+            const opponentColor = color === 'white' ? 'black' : 'white';
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const piece = board[r][c];
+                    if (!piece) continue;
+                    if (getPieceColor(piece) !== opponentColor) continue;
+
+                    // Generate pergerakan lawan TANPA filter skak (karena kita hanya perlu serangan)
+                    const type = getPieceType(piece);
+                    let moves = [];
+                    if (type === 'pawn') {
+                        // Pion lawan: arah makan
+                        const dir = opponentColor === 'white' ? -1 : 1;
+                        for (const dCol of [-1, 1]) {
+                            if (kingRow === r + dir && kingCol === c + dCol) return true;
+                        }
+                    } else if (type === 'knight') {
+                        const offsets = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+                        for (const [dr, dc] of offsets) {
+                            if (r + dr === kingRow && c + dc === kingCol) return true;
+                        }
+                    } else if (type === 'king') {
+                        const offsets = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+                        for (const [dr, dc] of offsets) {
+                            if (r + dr === kingRow && c + dc === kingCol) return true;
+                        }
+                    } else {
+                        // Untuk benteng, gajah, ratu: cek sliding
+                        let dirs = [];
+                        if (type === 'rook') dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+                        else if (type === 'bishop') dirs = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+                        else if (type === 'queen') dirs = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+
+                        for (const [dr, dc] of dirs) {
+                            let nr = r + dr;
+                            let nc = c + dc;
+                            while (inBounds(nr, nc)) {
+                                if (nr === kingRow && nc === kingCol) return true;
+                                if (board[nr][nc] !== null) break; // terhalang
+                                nr += dr;
+                                nc += dc;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        // ---------- CEK APAKAH PEMAIN PUNYA LANGKAH LEGAL (untuk skakmat / remis) ----------
+        function hasAnyLegalMove(color) {
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const piece = board[r][c];
+                    if (!piece) continue;
+                    if (getPieceColor(piece) !== color) continue;
+
+                    // Dapatkan langkah legal untuk bidak ini (dengan filter skak)
+                    // Kita perlu menggunakan currentPlayer = color sementara
+                    const oldPlayer = currentPlayer;
+                    currentPlayer = color;
+                    const moves = getLegalMoves(r, c);
+                    currentPlayer = oldPlayer;
+
+                    if (moves.length > 0) return true;
+                }
+            }
+            return false;
+        }
+
+        // ---------- UPDATE STATUS GAME (SKAKMAT / REMIS) ----------
+        function checkGameEnd() {
+            const opponent = currentPlayer === 'white' ? 'black' : 'white';
+            const inCheck = isKingInCheck(currentPlayer);
+            const hasMove = hasAnyLegalMove(currentPlayer);
+
+            if (!hasMove) {
+                if (inCheck) {
+                    // Skakmat: lawan menang
+                    gameOver = true;
+                    winner = opponent;
+                } else {
+                    // Remis (stalemate)
+                    gameOver = true;
+                    winner = null; // seri
+                }
+                selectedRow = -1;
+                selectedCol = -1;
+                legalMoves = [];
+                checkFlag = false;
+                renderBoard();
+                return true;
+            }
+            return false;
+        }
+
+        // ---------- FUNGSI KLIK KOTAK ----------
+        function onSquareClick(e) {
+            if (gameOver) return;
+
+            const row = parseInt(e.currentTarget.dataset.row);
+            const col = parseInt(e.currentTarget.dataset.col);
+
+            // Jika ada bidak yang sedang dipilih
+            if (selectedRow !== -1 && selectedCol !== -1) {
+                // Cek apakah kotak yang diklik adalah langkah legal
+                const move = legalMoves.find(m => m.row === row && m.col === col);
+                if (move) {
+                    // Lakukan langkah
+                    executeMove(selectedRow, selectedCol, row, col);
+                    return;
+                }
+            }
+
+            // Jika tidak, coba pilih bidak
+            const piece = board[row][col];
+            if (piece && getPieceColor(piece) === currentPlayer) {
+                // Pilih bidak ini
+                selectedRow = row;
+                selectedCol = col;
+                legalMoves = getLegalMoves(row, col);
+
+                // Cek skak untuk highlight raja
+                checkFlag = isKingInCheck(currentPlayer);
+                renderBoard();
+            } else {
+                // Klik di kotak kosong atau bidak lawan -> batalkan pilihan
+                selectedRow = -1;
+                selectedCol = -1;
+                legalMoves = [];
+                checkFlag = false;
+                renderBoard();
+            }
+        }
+
+        // ---------- EKSEKUSI LANGKAH ----------
+        function executeMove(fromRow, fromCol, toRow, toCol) {
+            const piece = board[fromRow][fromCol];
+            const target = board[toRow][toCol];
+
+            // Pindahkan bidak
+            board[toRow][toCol] = piece;
+            board[fromRow][fromCol] = null;
+
+            // Reset pilihan
+            selectedRow = -1;
+            selectedCol = -1;
+            legalMoves = [];
+
+            // Ganti pemain
+            currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
+
+            // Cek skak untuk pemain baru
+            checkFlag = isKingInCheck(currentPlayer);
+
+            // Cek apakah permainan berakhir (skakmat / remis)
+            const ended = checkGameEnd();
+            if (!ended) {
+                renderBoard();
+            } else {
+                // renderBoard sudah dipanggil di checkGameEnd
+            }
+        }
+
+        // ---------- RESET PERMAINAN ----------
+        function resetGame() {
+            // Reset papan ke posisi awal
+            board = [
+                ['♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜'],
+                ['♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟'],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                ['♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙'],
+                ['♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖']
+            ];
+            currentPlayer = 'white';
+            selectedRow = -1;
+            selectedCol = -1;
+            legalMoves = [];
+            gameOver = false;
+            winner = null;
+            checkFlag = false;
+            renderBoard();
+        }
+
+        // ---------- INISIALISASI ----------
+        function init() {
+            renderBoard();
+            resetBtn.addEventListener('click', resetGame);
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
