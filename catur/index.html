@@ -774,5 +774,75 @@
         init();
     })();
 </script>
+<script>// === AUTO-TRACKING: GAMING WORLD ===
+(function() {
+  window.GAME_ID = 'catur';
+  window.GAME_SECRET = 'GWS_0oqayu7w442_muzoykmy';
+  window.API_URL = 'https://duniamu.my.id/api/minigame/result';
+  
+  function getUserId() {
+    try {
+      var uid = localStorage.getItem('ys_user_id');
+      if (uid) return uid;
+      if (window.parent && window.parent.Auth && window.parent.Auth.user) {
+        return window.parent.Auth.user.uid;
+      }
+      if (window.Auth && window.Auth.user) {
+        return window.Auth.user.uid;
+      }
+    } catch(e) {}
+    return null;
+  }
+  
+  window.reportGameResult = function(result, score) {
+    var userId = getUserId();
+    if (!userId) {
+      console.log('[Game] User belum login');
+      return Promise.resolve({ ok: false, reason: 'not_logged_in' });
+    }
+    
+    var payload = {
+      userId: userId,
+      gameId: window.GAME_ID,
+      result: result,
+      score: score || 0,
+      secret: window.GAME_SECRET
+    };
+    
+    return fetch(window.API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok && data.reward > 0) {
+        console.log('[Game] +' + data.reward + ' koin!');
+      }
+      return data;
+    })
+    .catch(function(e) {
+      console.warn('[Game] Tracking error:', e);
+      return { ok: false, error: e.message };
+    });
+  };
+  
+  var _originalAlert = window.alert;
+  window.alert = function(msg) {
+    try {
+      var lowerMsg = String(msg || '').toLowerCase();
+      if (lowerMsg.indexOf('menang') >= 0 || lowerMsg.indexOf('win') >= 0 || lowerMsg.indexOf('selamat') >= 0) {
+        var scoreMatch = lowerMsg.match(/(\d+)/);
+        var score = scoreMatch ? parseInt(scoreMatch[1]) : 0;
+        window.reportGameResult('win', score);
+      } else if (lowerMsg.indexOf('kalah') >= 0 || lowerMsg.indexOf('lose') >= 0 || lowerMsg.indexOf('game over') >= 0) {
+        window.reportGameResult('lose', 0);
+      }
+    } catch(e) {}
+    return _originalAlert.apply(window, arguments);
+  };
+  
+  console.log('[Game] Tracker loaded for ' + window.GAME_ID);
+})();</script>
 </body>
 </html>
