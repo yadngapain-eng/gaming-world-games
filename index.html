@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Gaming World — Mini Games</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{font-family:Inter,sans-serif;background:linear-gradient(135deg,#6366f1,#8b5cf6,#a855f7);color:#fff;min-height:100vh;padding:20px;text-align:center}h1{font-size:32px;margin:20px 0}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;max-width:600px;margin:20px auto}.card{background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);border-radius:12px;padding:20px;text-decoration:none;color:#fff;transition:transform .2s}.card:active{transform:scale(0.95)}.icon{font-size:36px;margin-bottom:8px}</style></head><body>
+<h1>🎮 Mini Games</h1>
+<p>Pilih game favoritmu</p>
+<div class="grid" id="grid"></div>
+<script>fetch("games.json").then(r=>r.json()).then(d=>{var g=document.getElementById("grid");(d.games||[]).forEach(x=>{if(x.active===false)return;var a=document.createElement("a");a.className="card";a.href=x.path;a.innerHTML="<div class=\"icon\">"+(x.icon||"🎮")+"</div><div>"+x.name+"</div>";g.appendChild(a)})});</script>
+</body></html>
