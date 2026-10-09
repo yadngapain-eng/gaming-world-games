@@ -19,6 +19,16 @@
       "path": "3d-ular-tangga/",
       "active": true,
       "addedAt": "2026-10-09T05:19:54.386Z"
+    },
+    {
+      "id": "monopoli-world-3d",
+      "name": "Monopoli World 3D",
+      "icon": "🎲",
+      "description": "Monopoli World 3D adalah simulasi papan Monopoli dalam tampilan 3D dengan kontrol FPS, memungkinkan pemain menjelajah dan bertransaksi di dunia hidup.",
+      "category": "arcade",
+      "path": "monopoli-world-3d/",
+      "active": true,
+      "addedAt": "2026-10-09T06:05:21.190Z"
     }
   ]
 }
