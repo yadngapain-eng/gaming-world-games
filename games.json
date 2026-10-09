@@ -9,16 +9,6 @@
       "path": "catur/",
       "active": true,
       "addedAt": "2026-10-08T12:12:36.209Z"
-    },
-    {
-      "id": "3d-ular-tangga",
-      "name": "3D ULAR TANGGA",
-      "icon": "🐍",
-      "description": "Game ular tangga 3D menantang pemain melompat naik turun papan sambil bersaing melawan AI.",
-      "category": "arcade",
-      "path": "3d-ular-tangga/",
-      "active": true,
-      "addedAt": "2026-10-09T04:42:47.208Z"
     }
   ]
 }
