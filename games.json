@@ -1,34 +1,3 @@
 {
-  "games": [
-    {
-      "id": "catur",
-      "name": "Catur",
-      "icon": "♟️",
-      "description": "Permainan catur dua pemain klasik dengan papan 8x8, strategi memindahkan bidak untuk skakmat lawan.",
-      "category": "chess",
-      "path": "catur/",
-      "active": true,
-      "addedAt": "2026-10-08T12:12:36.209Z"
-    },
-    {
-      "id": "3d-ular-tangga",
-      "name": "3D ULAR TANGGA",
-      "icon": "🐍",
-      "description": "Ular Tangga 3D melawan AI dengan tampilan tiga dimensi yang seru dan menantang.",
-      "category": "arcade",
-      "path": "3d-ular-tangga/",
-      "active": true,
-      "addedAt": "2026-10-09T05:19:54.386Z"
-    },
-    {
-      "id": "monopoli-world-3d",
-      "name": "Monopoli World 3D",
-      "icon": "🎲",
-      "description": "Monopoli World 3D adalah simulasi papan Monopoli dalam tampilan 3D dengan kontrol FPS, memungkinkan pemain menjelajah dan bertransaksi di dunia hidup.",
-      "category": "arcade",
-      "path": "monopoli-world-3d/",
-      "active": true,
-      "addedAt": "2026-10-09T06:05:21.190Z"
-    }
-  ]
+  "games": []
 }
