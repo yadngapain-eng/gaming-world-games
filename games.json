@@ -1,3 +1,14 @@
 {
-  "games": []
+  "games": [
+    {
+      "id": "monopoli-world-3d",
+      "name": "Monopoli World 3D",
+      "icon": "🎲",
+      "description": "Monopoli World 3D adalah game papan monopoli dalam tampilan 3D FPS yang memungkinkan pemain menjelajahi dunia hidup sambil membeli properti.",
+      "category": "action",
+      "path": "monopoli-world-3d/",
+      "active": true,
+      "addedAt": "2026-10-09T10:24:34.284Z"
+    }
+  ]
 }
