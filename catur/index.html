@@ -1260,10 +1260,33 @@ body {
         btn.style.background = 'linear-gradient(135deg, #16a34a, #15803d)';
         btn.style.color = '#fff';
 
-        // Update parent website
+        // Update parent website via postMessage
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({
+              type: 'MINIGAME_REWARD',
+              gameId: GAME_ID,
+              reward: data.reward,
+              newBalance: data.newBalance,
+              timestamp: Date.now()
+            }, '*');
+          }
+        } catch(e) {}
+        
+        // Update parent CoinHeader langsung
         try {
           if (window.parent && window.parent.CoinHeader && window.parent.CoinHeader.update) {
             window.parent.CoinHeader.update();
+          }
+        } catch(e) {}
+        
+        // Update parent Rewards
+        try {
+          if (window.parent && window.parent.Rewards && window.parent.Rewards.getState) {
+            var state = window.parent.Rewards.getState();
+            if (data.newBalance !== undefined) {
+              state.balance = data.newBalance;
+            }
           }
         } catch(e) {}
       } else {
