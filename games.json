@@ -11,16 +11,6 @@
       "addedAt": "2026-10-08T12:12:36.209Z"
     },
     {
-      "id": "ular-tangga",
-      "name": "Ular tangga",
-      "icon": "🐍",
-      "description": "Permainan ular tangga 3D melawan AI, pemain melempar dadu untuk naik tangga dan menghindari ular.",
-      "category": "arcade",
-      "path": "ular-tangga/",
-      "active": true,
-      "addedAt": "2026-10-09T03:53:16.826Z"
-    },
-    {
       "id": "ular-tangga-3d",
       "name": "Ular tangga 3D",
       "icon": "🐍",
