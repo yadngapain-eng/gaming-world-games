@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0f172a">
 <title>♟️ Catur Mini vs AI - Gaming World</title>
 <style>
 * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -22,7 +23,7 @@ body {
   width: 100%;
   max-width: 480px;
   background: linear-gradient(145deg, #1e293b, #0f172a);
-  padding: 16px;
+  padding: 14px;
   border-radius: 24px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.7), inset 0 1px 3px rgba(255,255,255,0.1);
 }
@@ -31,11 +32,11 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   padding: 0 4px;
 }
 .header h1 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 900;
   background: linear-gradient(135deg, #fbbf24, #f59e0b);
   -webkit-background-clip: text;
@@ -45,17 +46,49 @@ body {
   letter-spacing: -0.5px;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .coin-display {
   display: flex;
   align-items: center;
   gap: 4px;
   background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
   color: #78350f;
   box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3);
+}
+
+.sound-btn, .difficulty-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #334155;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.sound-btn:active, .difficulty-btn:active { transform: scale(0.9); }
+.sound-btn.muted { background: #dc2626; }
+
+.difficulty-btn {
+  width: auto;
+  padding: 0 12px;
+  border-radius: 17px;
+  font-size: 11px;
+  font-weight: 900;
+  gap: 4px;
 }
 
 .board-wrapper {
@@ -89,13 +122,14 @@ body {
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 0 2px #334155;
+  touch-action: manipulation;
 }
 
 .square {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(24px, 7vw, 42px);
+  font-size: clamp(22px, 7vw, 40px);
   line-height: 1;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -140,6 +174,11 @@ body {
   50% { box-shadow: inset 0 0 0 6px #ef4444, 0 0 20px rgba(239, 68, 68, 0.6); }
 }
 .square.last-move { box-shadow: inset 0 0 0 3px rgba(245, 158, 11, 0.5); }
+.square.hint { box-shadow: inset 0 0 0 4px #06b6d4; animation: hintPulse 1s ease-in-out infinite; }
+@keyframes hintPulse {
+  0%, 100% { box-shadow: inset 0 0 0 4px #06b6d4; }
+  50% { box-shadow: inset 0 0 0 6px #06b6d4, 0 0 20px rgba(6, 182, 212, 0.6); }
+}
 
 .files {
   display: grid;
@@ -155,20 +194,21 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 14px;
-  gap: 8px;
+  margin-top: 12px;
+  gap: 6px;
 }
 .turn-indicator {
   display: flex;
   align-items: center;
   gap: 8px;
   background: #0f172a;
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
   flex: 1;
+  min-width: 0;
 }
 .turn-dot {
   width: 14px;
@@ -186,20 +226,27 @@ body {
   50% { transform: scale(1.3); }
 }
 
-.reset-btn {
+.action-btn {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   border: none;
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 900;
-  padding: 10px 16px;
+  padding: 9px 12px;
   border-radius: 12px;
   cursor: pointer;
   box-shadow: 0 4px 0 #1e40af, 0 6px 12px rgba(0,0,0,0.3);
   transition: all 0.08s;
   font-family: inherit;
+  flex-shrink: 0;
+  min-width: 44px;
 }
-.reset-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #1e40af, 0 6px 12px rgba(0,0,0,0.3); }
+.action-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #1e40af, 0 6px 12px rgba(0,0,0,0.3); }
+.action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.action-btn.secondary { background: linear-gradient(135deg, #64748b, #475569); box-shadow: 0 4px 0 #1e293b, 0 6px 12px rgba(0,0,0,0.3); }
+.action-btn.secondary:active { box-shadow: 0 1px 0 #1e293b, 0 6px 12px rgba(0,0,0,0.3); }
+.action-btn.hint { background: linear-gradient(135deg, #06b6d4, #0891b2); box-shadow: 0 4px 0 #155e75, 0 6px 12px rgba(0,0,0,0.3); }
+.action-btn.hint:active { box-shadow: 0 1px 0 #155e75, 0 6px 12px rgba(0,0,0,0.3); }
 
 .winner-overlay {
   position: fixed;
@@ -213,14 +260,11 @@ body {
   padding: 20px;
   animation: fadeIn 0.3s ease;
 }
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .winner-card {
   background: linear-gradient(145deg, #1e293b, #0f172a);
   border-radius: 24px;
-  padding: 32px 24px;
+  padding: 28px 22px;
   max-width: 340px;
   width: 100%;
   text-align: center;
@@ -233,8 +277,8 @@ body {
   to { transform: scale(1); opacity: 1; }
 }
 .winner-icon {
-  font-size: 80px;
-  margin-bottom: 12px;
+  font-size: 70px;
+  margin-bottom: 10px;
   animation: bounce 0.6s ease infinite alternate;
 }
 @keyframes bounce {
@@ -242,40 +286,40 @@ body {
   to { transform: translateY(-8px); }
 }
 .winner-title {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 900;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   background: linear-gradient(135deg, #fbbf24, #f59e0b);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .winner-desc {
-  font-size: 13px;
+  font-size: 12px;
   color: #94a3b8;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   line-height: 1.5;
 }
 .reward-box {
   background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1));
   border: 2px solid rgba(251, 191, 36, 0.3);
   border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
+  padding: 16px;
+  margin-bottom: 16px;
 }
-.reward-label { font-size: 11px; color: #94a3b8; margin-bottom: 6px; font-weight: 700; letter-spacing: 1px; }
-.reward-amount { font-size: 36px; font-weight: 900; color: #fbbf24; }
-.reward-coin { font-size: 20px; }
+.reward-label { font-size: 10px; color: #94a3b8; margin-bottom: 4px; font-weight: 700; letter-spacing: 1px; }
+.reward-amount { font-size: 32px; font-weight: 900; color: #fbbf24; }
+.reward-coin { font-size: 18px; }
 
 .btn-claim {
   width: 100%;
-  padding: 14px;
+  padding: 13px;
   background: linear-gradient(135deg, #fbbf24, #f59e0b);
   color: #78350f;
   border: none;
   border-radius: 12px;
   font-family: inherit;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 900;
   cursor: pointer;
   box-shadow: 0 4px 0 #b45309, 0 6px 20px rgba(245, 158, 11, 0.4);
@@ -293,10 +337,12 @@ body {
   border: none;
   border-radius: 12px;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.2s;
 }
+.btn-secondary:active { background: #475569; }
 
 .toast {
   position: fixed;
@@ -305,9 +351,9 @@ body {
   transform: translateX(-50%) translateY(100px);
   background: #1e293b;
   color: #fff;
-  padding: 12px 20px;
+  padding: 11px 18px;
   border-radius: 12px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   z-index: 10000;
@@ -319,6 +365,7 @@ body {
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.error { background: #dc2626; }
 .toast.success { background: #16a34a; }
+.toast.info { background: #0891b2; }
 
 .loading {
   position: fixed;
@@ -355,7 +402,10 @@ body {
 <div class="game-container">
   <div class="header">
     <h1>♟️ Catur Mini</h1>
-    <div class="coin-display" id="coinDisplay">🪙 <span id="coinValue">0</span></div>
+    <div class="header-right">
+      <div class="coin-display">🪙 <span id="coinValue">0</span></div>
+      <button class="sound-btn" id="soundBtn" title="Suara">🔊</button>
+    </div>
   </div>
 
   <div class="board-wrapper">
@@ -371,7 +421,13 @@ body {
       <div class="turn-dot" id="turnDot"></div>
       <span id="turnText">Giliran Kamu</span>
     </div>
-    <button class="reset-btn" id="resetBtn">🔄 Ulang</button>
+    <button class="action-btn" id="btnUndo" title="Undo" disabled>↶</button>
+    <button class="action-btn hint" id="btnHint" title="Hint">💡</button>
+    <button class="action-btn secondary" id="btnReset" title="Reset">🔄</button>
+  </div>
+
+  <div style="display:flex;gap:6px;margin-top:8px">
+    <button class="difficulty-btn" id="btnDiff" style="flex:1">🎯 Medium</button>
   </div>
 </div>
 
@@ -387,6 +443,43 @@ body {
   const GAME_ID = 'catur';
   const API_URL = 'https://duniamu.my.id/api/minigame/claim';
   const WIN_REWARD = 50;
+  const STORAGE_KEY = 'catur_mini_state_v1';
+  const SOUND_KEY = 'catur_mini_sound';
+  const DIFF_KEY = 'catur_mini_difficulty';
+
+  // ═══════════════════════════════════════════════════════════════
+  //  GET UID FROM URL OR PARENT
+  // ═══════════════════════════════════════════════════════════════
+  function getUserId() {
+    try {
+      // 1. Cek URL parameter
+      var urlParams = new URLSearchParams(window.location.search);
+      var uidFromUrl = urlParams.get('uid') || urlParams.get('userId');
+      if (uidFromUrl) {
+        localStorage.setItem('ys_user_id', uidFromUrl);
+        return uidFromUrl;
+      }
+
+      // 2. Cek localStorage
+      var uid = localStorage.getItem('ys_user_id');
+      if (uid) return uid;
+
+      // 3. Cek parent window (kalau iframe)
+      if (window.parent && window.parent !== window) {
+        try {
+          if (window.parent.Auth && window.parent.Auth.user) {
+            return window.parent.Auth.user.uid;
+          }
+        } catch(e) {}
+      }
+
+      // 4. Cek window sendiri
+      if (window.Auth && window.Auth.user) {
+        return window.Auth.user.uid;
+      }
+    } catch(e) {}
+    return null;
+  }
 
   // ═══════════════════════════════════════════════════════════════
   //  STATE
@@ -428,6 +521,10 @@ body {
   let lastMove = null;
   let isThinking = false;
   let gameState = { rewarded: false, claimed: false };
+  let history = [];  // untuk undo
+  let hintCell = null;
+  let soundEnabled = localStorage.getItem(SOUND_KEY) !== 'false';
+  let difficulty = localStorage.getItem(DIFF_KEY) || 'medium';
 
   // ═══════════════════════════════════════════════════════════════
   //  DOM
@@ -437,25 +534,29 @@ body {
   const fileLabelsEl = document.getElementById('fileLabels');
   const turnTextEl = document.getElementById('turnText');
   const turnDotEl = document.getElementById('turnDot');
-  const resetBtn = document.getElementById('resetBtn');
+  const btnReset = document.getElementById('btnReset');
+  const btnUndo = document.getElementById('btnUndo');
+  const btnHint = document.getElementById('btnHint');
+  const btnDiff = document.getElementById('btnDiff');
+  const soundBtn = document.getElementById('soundBtn');
   const toastEl = document.getElementById('toast');
   const coinValueEl = document.getElementById('coinValue');
   const loadingEl = document.getElementById('loading');
 
   // ═══════════════════════════════════════════════════════════════
-  //  SOUND (Web Audio API)
+  //  SOUND
   // ═══════════════════════════════════════════════════════════════
   let audioCtx = null;
   function initAudio() {
-    if (!audioCtx) {
+    if (!audioCtx && soundEnabled) {
       try {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      } catch(e) { console.warn('Audio not supported'); }
+      } catch(e) {}
     }
   }
 
   function playTone(freq, duration, type, volume) {
-    if (!audioCtx) return;
+    if (!audioCtx || !soundEnabled) return;
     try {
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
@@ -471,41 +572,73 @@ body {
   }
 
   function playSound(name) {
+    if (!soundEnabled) return;
     initAudio();
     switch(name) {
       case 'move':
-        playTone(400, 0.1, 'sine', 0.15);
-        setTimeout(() => playTone(600, 0.08, 'sine', 0.1), 40);
+        playTone(400, 0.08, 'sine', 0.12);
+        setTimeout(() => playTone(600, 0.06, 'sine', 0.08), 40);
         break;
       case 'capture':
-        playTone(300, 0.15, 'square', 0.15);
-        setTimeout(() => playTone(200, 0.2, 'square', 0.12), 80);
+        playTone(300, 0.12, 'square', 0.12);
+        setTimeout(() => playTone(200, 0.15, 'square', 0.1), 80);
         break;
       case 'check':
-        playTone(800, 0.15, 'triangle', 0.2);
-        setTimeout(() => playTone(1000, 0.15, 'triangle', 0.2), 100);
-        setTimeout(() => playTone(800, 0.2, 'triangle', 0.2), 200);
+        playTone(800, 0.12, 'triangle', 0.15);
+        setTimeout(() => playTone(1000, 0.12, 'triangle', 0.15), 100);
+        setTimeout(() => playTone(800, 0.15, 'triangle', 0.15), 200);
         break;
       case 'win':
         [523, 659, 784, 1047].forEach((f, i) => {
-          setTimeout(() => playTone(f, 0.2, 'sine', 0.2), i * 100);
+          setTimeout(() => playTone(f, 0.18, 'sine', 0.18), i * 100);
         });
         break;
       case 'lose':
         [400, 350, 300, 200].forEach((f, i) => {
-          setTimeout(() => playTone(f, 0.3, 'triangle', 0.15), i * 120);
+          setTimeout(() => playTone(f, 0.25, 'triangle', 0.12), i * 120);
         });
         break;
       case 'coin':
         [800, 1000, 1200].forEach((f, i) => {
-          setTimeout(() => playTone(f, 0.1, 'sine', 0.2), i * 60);
+          setTimeout(() => playTone(f, 0.08, 'sine', 0.15), i * 60);
         });
         break;
       case 'click':
-        playTone(600, 0.05, 'sine', 0.08);
+        playTone(600, 0.04, 'sine', 0.06);
+        break;
+      case 'hint':
+        playTone(1200, 0.1, 'sine', 0.1);
         break;
     }
   }
+
+  soundBtn.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem(SOUND_KEY, soundEnabled);
+    soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
+    soundBtn.classList.toggle('muted', !soundEnabled);
+    if (soundEnabled) { initAudio(); playSound('click'); }
+    showToast(soundEnabled ? '🔊 Suara aktif' : '🔇 Suara mati', 'info');
+  });
+  soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
+  soundBtn.classList.toggle('muted', !soundEnabled);
+
+  // ═══════════════════════════════════════════════════════════════
+  //  DIFFICULTY
+  // ═══════════════════════════════════════════════════════════════
+  const DIFF_LABELS = { easy: '🎯 Easy', medium: '🎯 Medium', hard: '🔥 Hard' };
+  const DIFF_DEPTH = { easy: 1, medium: 2, hard: 3 };
+
+  btnDiff.textContent = DIFF_LABELS[difficulty];
+  btnDiff.addEventListener('click', () => {
+    const order = ['easy', 'medium', 'hard'];
+    const idx = order.indexOf(difficulty);
+    difficulty = order[(idx + 1) % order.length];
+    localStorage.setItem(DIFF_KEY, difficulty);
+    btnDiff.textContent = DIFF_LABELS[difficulty];
+    showToast('Kesulitan: ' + DIFF_LABELS[difficulty], 'info');
+    playSound('click');
+  });
 
   // ═══════════════════════════════════════════════════════════════
   //  TOAST
@@ -517,24 +650,7 @@ body {
     toastEl.className = 'toast show' + (type ? ' ' + type : '');
     toastTimer = setTimeout(() => {
       toastEl.classList.remove('show');
-    }, 3000);
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  //  USER ID (dari parent / localStorage)
-  // ═══════════════════════════════════════════════════════════════
-  function getUserId() {
-    try {
-      var uid = localStorage.getItem('ys_user_id');
-      if (uid) return uid;
-      if (window.parent && window.parent.Auth && window.parent.Auth.user) {
-        return window.parent.Auth.user.uid;
-      }
-      if (window.Auth && window.Auth.user) {
-        return window.Auth.user.uid;
-      }
-    } catch(e) {}
-    return null;
+    }, 2500);
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -703,20 +819,9 @@ body {
   }
 
   // ═══════════════════════════════════════════════════════════════
-  //  AI — MINIMAX SEDERHANA
+  //  AI
   // ═══════════════════════════════════════════════════════════════
-  const PIECE_VALUE = { pawn: 10, knight: 30, bishop: 30, rook: 50, queen: 90, king: 1000 };
-
-  function evaluateBoard() {
-    let score = 0;
-    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-      const p = board[r][c];
-      if (!p) continue;
-      const val = PIECE_VALUE[getType(p)] || 0;
-      score += getColor(p) === 'white' ? -val : val; // AI = black
-    }
-    return score;
-  }
+  const PIECE_VALUE = { pawn: 10, knight: 30, bishop: 30, rook: 50, queen: 90, king: 10000 };
 
   function getAllLegalMoves(color) {
     const all = [];
@@ -730,6 +835,17 @@ body {
       for (const m of moves) all.push({ from: [r, c], to: m });
     }
     return all;
+  }
+
+  function evaluateBoard() {
+    let score = 0;
+    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+      const p = board[r][c];
+      if (!p) continue;
+      const val = PIECE_VALUE[getType(p)] || 0;
+      score += getColor(p) === 'white' ? -val : val;
+    }
+    return score;
   }
 
   function aiMove() {
@@ -747,7 +863,6 @@ body {
         return;
       }
 
-      // Simple AI: pilih move dengan nilai tertinggi
       let best = null;
       let bestScore = -Infinity;
 
@@ -755,15 +870,18 @@ body {
         const captured = board[mv.to.row][mv.to.col];
         const piece = board[mv.from[0]][mv.from[1]];
 
-        // Skor: nilai capture + sedikit random
         let score = 0;
         if (captured) score += PIECE_VALUE[getType(captured)] || 0;
-        score += Math.random() * 5;
+
+        // Difficulty affects randomness
+        if (difficulty === 'easy') score += Math.random() * 30 - 15;
+        else if (difficulty === 'medium') score += Math.random() * 10 - 5;
+        else score += Math.random() * 2 - 1;
 
         // Cek skak
         board[mv.to.row][mv.to.col] = piece;
         board[mv.from[0]][mv.from[1]] = null;
-        if (isKingInCheck('white')) score += 20;
+        if (isKingInCheck('white')) score += 30;
         board[mv.from[0]][mv.from[1]] = piece;
         board[mv.to.row][mv.to.col] = captured;
 
@@ -774,6 +892,9 @@ body {
       }
 
       if (best) {
+        // Save history for undo
+        saveHistory();
+
         const captured = board[best.to.row][best.to.col];
         const piece = board[best.from[0]][best.from[1]];
 
@@ -790,20 +911,93 @@ body {
         isThinking = false;
         turnDotEl.classList.remove('thinking');
         selectedRow = -1; selectedCol = -1; legalMoves = [];
+        hintCell = null;
+        btnUndo.disabled = history.length === 0;
         render();
         updateStatus();
+        saveState();
 
-        setTimeout(() => {
-          if (!checkGameEnd()) {
-            // Cek kalau AI menang
-            if (checkFlag && !hasAnyLegalMove('white')) {
-              // sudah dihandle di checkGameEnd
-            }
-          }
-        }, 100);
+        checkGameEnd();
       }
-    }, 500 + Math.random() * 500);
+    }, 400 + Math.random() * 400);
   }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  HISTORY (UNDO)
+  // ═══════════════════════════════════════════════════════════════
+  function saveHistory() {
+    history.push({
+      board: JSON.parse(JSON.stringify(board)),
+      currentPlayer: currentPlayer,
+      lastMove: lastMove ? JSON.parse(JSON.stringify(lastMove)) : null,
+      gameOver: gameOver,
+      winner: winner
+    });
+    if (history.length > 20) history.shift();
+  }
+
+  function undoMove() {
+    if (history.length === 0 || isThinking) return;
+
+    // Undo 2x (player + AI)
+    let undos = 0;
+    while (history.length > 0 && undos < 2) {
+      const state = history.pop();
+      board = state.board;
+      currentPlayer = state.currentPlayer;
+      lastMove = state.lastMove;
+      gameOver = state.gameOver;
+      winner = state.winner;
+      undos++;
+      if (currentPlayer === 'white') break;
+    }
+
+    selectedRow = -1; selectedCol = -1; legalMoves = [];
+    checkFlag = isKingInCheck(currentPlayer);
+    hintCell = null;
+    btnUndo.disabled = history.length === 0;
+    render();
+    updateStatus();
+    saveState();
+    showToast('↶ Undo', 'info');
+    playSound('click');
+  }
+
+  btnUndo.addEventListener('click', undoMove);
+
+  // ═══════════════════════════════════════════════════════════════
+  //  HINT
+  // ═══════════════════════════════════════════════════════════════
+  btnHint.addEventListener('click', () => {
+    if (gameOver || isThinking || currentPlayer !== 'white') return;
+
+    const moves = getAllLegalMoves('white');
+    if (moves.length === 0) return;
+
+    // Pilih move terbaik (capture value tinggi)
+    let best = null;
+    let bestScore = -Infinity;
+    for (const mv of moves) {
+      const captured = board[mv.to.row][mv.to.col];
+      let score = captured ? (PIECE_VALUE[getType(captured)] || 0) : 0;
+      score += Math.random() * 3;
+      if (score > bestScore) {
+        bestScore = score;
+        best = mv;
+      }
+    }
+
+    if (best) {
+      hintCell = { from: best.from, to: [best.to.row, best.to.col] };
+      playSound('hint');
+      showToast('💡 Petunjuk: lihat kotak biru', 'info');
+      render();
+      setTimeout(() => {
+        hintCell = null;
+        render();
+      }, 4000);
+    }
+  });
 
   // ═══════════════════════════════════════════════════════════════
   //  RENDER
@@ -829,6 +1023,13 @@ body {
           if ((lastMove.from[0] === r && lastMove.from[1] === c) ||
               (lastMove.to[0] === r && lastMove.to[1] === c)) {
             sq.classList.add('last-move');
+          }
+        }
+
+        if (hintCell) {
+          if ((hintCell.from[0] === r && hintCell.from[1] === c) ||
+              (hintCell.to[0] === r && hintCell.to[1] === c)) {
+            sq.classList.add('hint');
           }
         }
 
@@ -900,6 +1101,8 @@ body {
   }
 
   function executeMove(fr, fc, tr, tc) {
+    saveHistory();
+
     const piece = board[fr][fc];
     const captured = board[tr][tc];
 
@@ -910,16 +1113,18 @@ body {
     playSound(captured ? 'capture' : 'move');
 
     selectedRow = -1; selectedCol = -1; legalMoves = [];
+    hintCell = null;
     currentPlayer = 'black';
     checkFlag = isKingInCheck('black');
     if (checkFlag) playSound('check');
 
+    btnUndo.disabled = history.length === 0;
     render();
     updateStatus();
+    saveState();
 
     if (checkGameEnd()) return;
 
-    // AI jalan
     aiMove();
   }
 
@@ -946,6 +1151,7 @@ body {
         winner = null;
         showWinner('draw');
       }
+      saveState();
       return true;
     }
     return false;
@@ -1018,7 +1224,12 @@ body {
 
     const userId = getUserId();
     if (!userId) {
-      showToast('Login dulu di Gaming World', 'error');
+      showToast('⚠️ Login dulu di Gaming World!', 'error');
+      btn.textContent = '❌ Belum Login';
+      setTimeout(() => {
+        btn.textContent = '💰 KLAIM REWARD';
+        btn.disabled = false;
+      }, 2000);
       return;
     }
 
@@ -1042,17 +1253,14 @@ body {
         playSound('coin');
         showToast('🎉 +' + data.reward + ' koin!', 'success');
 
-        // Update coin display
-        if (typeof coinValueEl !== 'undefined') {
-          const current = parseInt(coinValueEl.textContent) || 0;
-          coinValueEl.textContent = current + data.reward;
-        }
+        const current = parseInt(coinValueEl.textContent) || 0;
+        coinValueEl.textContent = current + data.reward;
 
         btn.textContent = '✅ +' + data.reward + ' koin';
         btn.style.background = 'linear-gradient(135deg, #16a34a, #15803d)';
         btn.style.color = '#fff';
 
-        // Update parent website coin (kalau iframe)
+        // Update parent website
         try {
           if (window.parent && window.parent.CoinHeader && window.parent.CoinHeader.update) {
             window.parent.CoinHeader.update();
@@ -1072,52 +1280,103 @@ body {
   }
 
   // ═══════════════════════════════════════════════════════════════
+  //  AUTO-SAVE
+  // ═══════════════════════════════════════════════════════════════
+  function saveState() {
+    try {
+      const state = {
+        board: board,
+        currentPlayer: currentPlayer,
+        gameOver: gameOver,
+        winner: winner,
+        lastMove: lastMove,
+        savedAt: Date.now()
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch(e) {}
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const state = JSON.parse(raw);
+      // Cek umur state (max 24 jam)
+      if (Date.now() - state.savedAt > 24 * 60 * 60 * 1000) {
+        localStorage.removeItem(STORAGE_KEY);
+        return false;
+      }
+      board = state.board;
+      currentPlayer = state.currentPlayer;
+      gameOver = state.gameOver;
+      winner = state.winner;
+      lastMove = state.lastMove;
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
   //  RESET
   // ═══════════════════════════════════════════════════════════════
   function resetGame() {
+    if (!confirm('Ulang game? Progress akan hilang.')) return;
+
     board = JSON.parse(JSON.stringify(INITIAL_BOARD));
     currentPlayer = 'white';
     selectedRow = -1; selectedCol = -1; legalMoves = [];
     gameOver = false; winner = null; checkFlag = false; lastMove = null;
     isThinking = false;
     gameState = { rewarded: false, claimed: false };
+    history = [];
+    hintCell = null;
     turnDotEl.classList.remove('thinking');
+    btnUndo.disabled = true;
+    localStorage.removeItem(STORAGE_KEY);
     render();
     updateStatus();
-    showToast('Game baru dimulai!', 'success');
+    showToast('🔄 Game baru dimulai!', 'success');
   }
+
+  btnReset.addEventListener('click', resetGame);
 
   // ═══════════════════════════════════════════════════════════════
   //  INIT
   // ═══════════════════════════════════════════════════════════════
   renderLabels();
+
+  // Coba load state
+  if (!loadState()) {
+    board = JSON.parse(JSON.stringify(INITIAL_BOARD));
+  }
+
   render();
   updateStatus();
-
-  resetBtn.addEventListener('click', () => {
-    if (gameOver || confirm('Ulang game? Progress akan hilang.')) {
-      resetGame();
-    }
-  });
+  checkFlag = isKingInCheck(currentPlayer);
+  btnUndo.disabled = history.length === 0;
 
   // Load coin dari parent
-  try {
-    if (window.parent && window.parent.Auth && window.parent.Auth.user) {
-      // Request coin dari parent
-      setTimeout(() => {
-        try {
-          if (window.parent.Rewards && window.parent.Rewards.getState) {
-            const state = window.parent.Rewards.getState();
-            coinValueEl.textContent = state.balance || 0;
-          }
-        } catch(e) {}
-      }, 1000);
-    }
-  } catch(e) {}
+  setTimeout(() => {
+    try {
+      if (window.parent && window.parent.Rewards && window.parent.Rewards.getState) {
+        const state = window.parent.Rewards.getState();
+        coinValueEl.textContent = state.balance || 0;
+      }
+    } catch(e) {}
+  }, 1000);
 
   setTimeout(() => {
     loadingEl.classList.add('hide');
-  }, 500);
+  }, 300);
+
+  // Deteksi UID dari URL
+  const uid = getUserId();
+  if (uid) {
+    console.log('[Catur Mini] User ID:', uid.substring(0, 10) + '...');
+  } else {
+    console.log('[Catur Mini] No user ID — login required for claim');
+  }
 
   console.log('[Catur Mini] Loaded — AI opponent ready');
 })();
