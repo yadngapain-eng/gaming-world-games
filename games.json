@@ -9,6 +9,26 @@
       "path": "catur/",
       "active": true,
       "addedAt": "2026-10-08T12:12:36.209Z"
+    },
+    {
+      "id": "ular-tangga-3d",
+      "name": "Ular tangga 3D",
+      "icon": "🐍",
+      "description": "Ular Tangga 3D adalah permainan papan klasik dengan tampilan tiga dimensi yang menantang pemain untuk mencapai akhir dengan menghindari ular dan memanfaatkan tangga.",
+      "category": "arcade",
+      "path": "ular-tangga-3d/",
+      "active": true,
+      "addedAt": "2026-10-09T04:22:50.346Z"
+    },
+    {
+      "id": "3d-ular-tangga",
+      "name": "3D ULAR TANGGA",
+      "icon": "🐍",
+      "description": "Game ular tangga 3D menantang pemain melompat naik turun papan sambil bersaing melawan AI.",
+      "category": "arcade",
+      "path": "3d-ular-tangga/",
+      "active": true,
+      "addedAt": "2026-10-09T04:42:47.208Z"
     }
   ]
 }
