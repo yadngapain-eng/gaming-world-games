@@ -19,6 +19,16 @@
       "path": "ular-tangga-3d/",
       "active": true,
       "addedAt": "2026-10-09T05:05:34.526Z"
+    },
+    {
+      "id": "3d-ular-tangga",
+      "name": "3D ULAR TANGGA",
+      "icon": "🐍",
+      "description": "Ular Tangga 3D melawan AI dengan tampilan tiga dimensi yang seru dan menantang.",
+      "category": "arcade",
+      "path": "3d-ular-tangga/",
+      "active": true,
+      "addedAt": "2026-10-09T05:19:54.386Z"
     }
   ]
 }
