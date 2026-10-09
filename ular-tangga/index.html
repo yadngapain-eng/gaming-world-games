@@ -1140,5 +1140,140 @@
         initThree();
         updateUI();
     </script>
+<!-- GAMING WORLD — AUTO TEMPLATE -->
+<script>
+(function() {
+  'use strict';
+  var CONFIG = {
+    API_URL: 'https://duniamu.my.id/api/minigame/claim',
+    GAME_ID: 'ular-tangga'
+  };
+  var URL_TOKEN = null;
+  var UID = null;
+  function getUidAndToken() {
+    try {
+      var urlParams = new URLSearchParams(window.location.search);
+      var uidParam = urlParams.get('uid') || urlParams.get('userId');
+      var tokenParam = urlParams.get('token');
+      if (tokenParam) URL_TOKEN = tokenParam;
+      if (uidParam) { UID = uidParam; localStorage.setItem('ys_user_id', uidParam); }
+      if (!UID) UID = localStorage.getItem('ys_user_id');
+      if (!UID && window.parent && window.parent !== window) {
+        try { if (window.parent.Auth && window.parent.Auth.user) UID = window.parent.Auth.user.uid; } catch(e) {}
+      }
+      if (!UID && window.Auth && window.Auth.user) UID = window.Auth.user.uid;
+    } catch(e) {}
+    return { uid: UID, token: URL_TOKEN };
+  }
+  var _audioCtx = null;
+  function playTone(freq, duration, type, volume) {
+    try {
+      if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      var osc = _audioCtx.createOscillator();
+      var gain = _audioCtx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(volume || 0.1, _audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, _audioCtx.currentTime + duration);
+      osc.connect(gain); gain.connect(_audioCtx.destination);
+      osc.start(); osc.stop(_audioCtx.currentTime + duration);
+    } catch(e) {}
+  }
+  function playSound(name) {
+    switch(name) {
+      case 'win': [523,659,784,1047].forEach(function(f,i){setTimeout(function(){playTone(f,0.18,'sine',0.18);},i*100);}); break;
+      case 'lose': [400,350,300,200].forEach(function(f,i){setTimeout(function(){playTone(f,0.25,'triangle',0.12);},i*120);}); break;
+      case 'coin': [800,1000,1200].forEach(function(f,i){setTimeout(function(){playTone(f,0.08,'sine',0.15);},i*60);}); break;
+      case 'click': playTone(600,0.04,'sine',0.06); break;
+    }
+  }
+  var _toastEl = null; var _toastTimer = null;
+  function showToast(msg, type) {
+    if (!_toastEl) {
+      _toastEl = document.createElement('div');
+      _toastEl.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:#1e293b;color:#fff;padding:11px 18px;border-radius:12px;font-size:12px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:10000;transition:transform 0.3s ease;pointer-events:none;max-width:90%;text-align:center';
+      document.body.appendChild(_toastEl);
+    }
+    if (_toastTimer) clearTimeout(_toastTimer);
+    _toastEl.textContent = msg;
+    var bg = type === 'error' ? '#dc2626' : (type === 'success' ? '#16a34a' : (type === 'info' ? '#0891b2' : '#1e293b'));
+    _toastEl.style.background = bg;
+    _toastEl.style.transform = 'translateX(-50%) translateY(0)';
+    _toastTimer = setTimeout(function() { _toastEl.style.transform = 'translateX(-50%) translateY(100px)'; }, 2500);
+  }
+  window.claimGameReward = function(winAmount, score) {
+    var info = getUidAndToken();
+    if (!info.uid) { showToast('Login dulu!', 'error'); return Promise.resolve({ ok: false, error: 'no_uid' }); }
+    if (!info.token) { showToast('Token tidak ada. Buka dari website!', 'error'); return Promise.resolve({ ok: false, error: 'no_token' }); }
+    showToast('Mengklaim...', 'info');
+    return fetch(CONFIG.API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: info.uid, gameId: CONFIG.GAME_ID, token: info.token, score: score || 0, playedAt: new Date().toISOString() })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        playSound('coin');
+        showToast('+' + data.reward + ' koin!', 'success');
+        if (window.updateCoinDisplay) window.updateCoinDisplay(data.reward, data.newBalance);
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'MINIGAME_REWARD', gameId: CONFIG.GAME_ID, reward: data.reward, newBalance: data.newBalance, timestamp: Date.now() }, '*');
+          }
+        } catch(e) {}
+        try { if (window.parent && window.parent.CoinHeader && window.parent.CoinHeader.update) window.parent.CoinHeader.update(); } catch(e) {}
+        return data;
+      } else {
+        showToast(data.error || 'Gagal klaim', 'error');
+        return data;
+      }
+    })
+    .catch(function(e) { showToast('Error koneksi', 'error'); return { ok: false, error: e.message }; });
+  };
+  window.gameGetUid = function() { return getUidAndToken().uid; };
+  window.gameGetToken = function() { return getUidAndToken().token; };
+  window.gameHasToken = function() { return !!getUidAndToken().token; };
+  window.gamePlaySound = playSound;
+  window.gameShowToast = showToast;
+  window.updateCoinDisplay = function(reward, newBalance) {
+    var valueEl = document.getElementById('gw-coin-value');
+    if (valueEl) {
+      if (newBalance !== undefined && newBalance !== null) valueEl.textContent = newBalance;
+      else { var c = parseInt(valueEl.textContent) || 0; valueEl.textContent = c + (reward || 0); }
+    }
+  };
+  var _origAlert = window.alert;
+  window.alert = function(msg) {
+    try {
+      var lower = String(msg || '').toLowerCase();
+      if (lower.indexOf('menang') >= 0 || lower.indexOf('win') >= 0 || lower.indexOf('selamat') >= 0) {
+        playSound('win');
+        setTimeout(function() { window.claimGameReward(0, 0); }, 800);
+      } else if (lower.indexOf('kalah') >= 0 || lower.indexOf('lose') >= 0) {
+        playSound('lose');
+      }
+    } catch(e) {}
+    return _origAlert.apply(window, arguments);
+  };
+  var info = getUidAndToken();
+  console.log('[Game Template] UID:', info.uid ? 'yes' : 'no', 'Token:', info.token ? 'yes' : 'no');
+  if (!document.getElementById('gw-coin-display')) {
+    var coinEl = document.createElement('div');
+    coinEl.id = 'gw-coin-display';
+    coinEl.style.cssText = 'position:fixed;top:10px;right:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:900;box-shadow:0 3px 10px rgba(245,158,11,0.3);z-index:9999';
+    coinEl.innerHTML = '🪙 <span id="gw-coin-value">0</span>';
+    document.body.appendChild(coinEl);
+    try {
+      if (window.parent && window.parent !== window) {
+        setTimeout(function() {
+          try { if (window.parent.Rewards && window.parent.Rewards.getState) { var s = window.parent.Rewards.getState(); var v = document.getElementById('gw-coin-value'); if (v) v.textContent = s.balance || 0; } } catch(e) {}
+        }, 1500);
+      }
+    } catch(e) {}
+  }
+})();
+</script>
+<!-- END GAMING WORLD TEMPLATE -->
 </body>
 </html>
