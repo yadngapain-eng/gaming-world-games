@@ -1716,5 +1716,292 @@
 })();
 </script>
 <!-- END GAMING WORLD TEMPLATE -->
+<!-- GAMING WORLD - AUTO TEMPLATE -->
+<script>
+(function() {
+  'use strict';
+  var CONFIG = {
+    API_URL: 'https://duniamu.my.id/api/minigame/claim',
+    GAME_ID: '3d-ular-tangga'
+  };
+  var URL_TOKEN = null;
+  var UID = null;
+  function getUidAndToken() {
+    try {
+      var urlParams = new URLSearchParams(window.location.search);
+      var uidParam = urlParams.get('uid') || urlParams.get('userId');
+      var tokenParam = urlParams.get('token');
+      if (tokenParam) URL_TOKEN = tokenParam;
+      if (uidParam) { UID = uidParam; localStorage.setItem('ys_user_id', uidParam); }
+      if (!UID) UID = localStorage.getItem('ys_user_id');
+      if (!UID && window.parent && window.parent !== window) {
+        try { if (window.parent.Auth && window.parent.Auth.user) UID = window.parent.Auth.user.uid; } catch(e) {}
+      }
+      if (!UID && window.Auth && window.Auth.user) UID = window.Auth.user.uid;
+    } catch(e) {}
+    return { uid: UID, token: URL_TOKEN };
+  }
+  var _audioCtx = null;
+  function playTone(freq, duration, type, volume) {
+    try {
+      if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      var osc = _audioCtx.createOscillator();
+      var gain = _audioCtx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(volume || 0.1, _audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, _audioCtx.currentTime + duration);
+      osc.connect(gain); gain.connect(_audioCtx.destination);
+      osc.start(); osc.stop(_audioCtx.currentTime + duration);
+    } catch(e) {}
+  }
+  function playSound(name) {
+    switch(name) {
+      case 'win': [523,659,784,1047].forEach(function(f,i){setTimeout(function(){playTone(f,0.18,'sine',0.18);},i*100);}); break;
+      case 'lose': [400,350,300,200].forEach(function(f,i){setTimeout(function(){playTone(f,0.25,'triangle',0.12);},i*120);}); break;
+      case 'coin': [800,1000,1200].forEach(function(f,i){setTimeout(function(){playTone(f,0.08,'sine',0.15);},i*60);}); break;
+      case 'click': playTone(600,0.04,'sine',0.06); break;
+    }
+  }
+  var _toastEl = null; var _toastTimer = null;
+  function showToast(msg, type) {
+    if (!_toastEl) {
+      _toastEl = document.createElement('div');
+      _toastEl.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:#1e293b;color:#fff;padding:11px 18px;border-radius:12px;font-size:12px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:10000;transition:transform 0.3s ease;pointer-events:none;max-width:90%;text-align:center;font-family:-apple-system,Inter,Roboto,sans-serif';
+      document.body.appendChild(_toastEl);
+    }
+    if (_toastTimer) clearTimeout(_toastTimer);
+    _toastEl.textContent = msg;
+    var bg = type === 'error' ? '#dc2626' : (type === 'success' ? '#16a34a' : (type === 'info' ? '#0891b2' : '#1e293b'));
+    _toastEl.style.background = bg;
+    _toastEl.style.transform = 'translateX(-50%) translateY(0)';
+    _toastTimer = setTimeout(function() { _toastEl.style.transform = 'translateX(-50%) translateY(100px)'; }, 2500);
+  }
+  window.claimGameReward = function(winAmount, score) {
+    var info = getUidAndToken();
+    if (!info.uid) { showToast('Login dulu!', 'error'); return Promise.resolve({ ok: false, error: 'no_uid' }); }
+    if (!info.token) { showToast('Token tidak ada. Buka dari website!', 'error'); return Promise.resolve({ ok: false, error: 'no_token' }); }
+    showToast('Mengklaim...', 'info');
+    return fetch(CONFIG.API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: info.uid, gameId: CONFIG.GAME_ID, token: info.token, score: score || 0, playedAt: new Date().toISOString() })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        playSound('coin');
+        showToast('+' + data.reward + ' koin!', 'success');
+        if (window.updateCoinDisplay) window.updateCoinDisplay(data.reward, data.newBalance);
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'MINIGAME_REWARD', gameId: CONFIG.GAME_ID, reward: data.reward, newBalance: data.newBalance, timestamp: Date.now() }, '*');
+          }
+        } catch(e) {}
+        try { if (window.parent && window.parent.CoinHeader && window.parent.CoinHeader.update) window.parent.CoinHeader.update(); } catch(e) {}
+        return data;
+      } else {
+        showToast(data.error || 'Gagal klaim', 'error');
+        return data;
+      }
+    })
+    .catch(function(e) { showToast('Error koneksi', 'error'); return { ok: false, error: e.message }; });
+  };
+  window.gameGetUid = function() { return getUidAndToken().uid; };
+  window.gameGetToken = function() { return getUidAndToken().token; };
+  window.gameHasToken = function() { return !!getUidAndToken().token; };
+  window.gamePlaySound = playSound;
+  window.gameShowToast = showToast;
+  
+  // â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�
+  //  AUTO-DETECT POSISI KOSONG
+  // â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�â•�
+  function isElementVisible(el) {
+    if (!el) return false;
+    var rect = el.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return false;
+    var style = window.getComputedStyle(el);
+    if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
+    if (rect.bottom < 0 || rect.right < 0) return false;
+    if (rect.top > window.innerHeight || rect.left > window.innerWidth) return false;
+    return true;
+  }
+  
+  function findFreePosition() {
+    var positions = [
+      { name: 'top-right', top: 10, right: 10 },
+      { name: 'top-left', top: 10, left: 10 },
+      { name: 'bottom-right', bottom: 10, right: 10 },
+      { name: 'bottom-left', bottom: 10, left: 10 }
+    ];
+    var boxSize = 60;
+    var padding = 8;
+    
+    var elements = document.body.querySelectorAll('*');
+    var occupied = [];
+    for (var i = 0; i < elements.length; i++) {
+      var el = elements[i];
+      if (!isElementVisible(el)) continue;
+      if (el.id === 'gw-coin-display') continue;
+      if (el.id === 'gw-floating-btn') continue;
+      if (el.closest && el.closest('#gw-coin-display')) continue;
+      if (el.closest && el.closest('#gw-floating-btn')) continue;
+      
+      var rect = el.getBoundingClientRect();
+      if (rect.width > window.innerWidth * 0.9 && rect.height > window.innerHeight * 0.9) continue;
+      if (rect.width < 20 && rect.height < 20) continue;
+      
+      occupied.push({
+        left: rect.left - padding,
+        top: rect.top - padding,
+        right: rect.right + padding,
+        bottom: rect.bottom + padding
+      });
+    }
+    
+    function isOverlap(pos) {
+      var box = {
+        left: pos.left !== undefined ? pos.left : (pos.right !== undefined ? window.innerWidth - pos.right - boxSize : 0),
+        top: pos.top !== undefined ? pos.top : (pos.bottom !== undefined ? window.innerHeight - pos.bottom - boxSize : 0),
+        right: 0,
+        bottom: 0
+      };
+      if (pos.left !== undefined) { box.left = pos.left; box.right = pos.left + boxSize; }
+      else { box.right = window.innerWidth - pos.right; box.left = box.right - boxSize; }
+      if (pos.top !== undefined) { box.top = pos.top; box.bottom = pos.top + boxSize; }
+      else { box.bottom = window.innerHeight - pos.bottom; box.top = box.bottom - boxSize; }
+      
+      for (var i = 0; i < occupied.length; i++) {
+        var occ = occupied[i];
+        if (box.left < occ.right && box.right > occ.left && box.top < occ.bottom && box.bottom > occ.top) {
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    for (var i = 0; i < positions.length; i++) {
+      if (!isOverlap(positions[i])) {
+        return positions[i];
+      }
+    }
+    
+    return null;
+  }
+  
+  function createCoinDisplay() {
+    if (document.getElementById('gw-coin-display')) return;
+    
+    var pos = findFreePosition();
+    var coinEl = document.createElement('div');
+    coinEl.id = 'gw-coin-display';
+    
+    var baseStyle = 'position:fixed;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:900;box-shadow:0 3px 10px rgba(245,158,11,0.4);z-index:9998;font-family:-apple-system,Inter,Roboto,sans-serif;display:flex;align-items:center;gap:4px;cursor:pointer;transition:transform 0.2s;user-select:none';
+    
+    if (pos) {
+      coinEl.style.cssText = baseStyle;
+      if (pos.top !== undefined) coinEl.style.top = pos.top + 'px';
+      if (pos.bottom !== undefined) coinEl.style.bottom = pos.bottom + 'px';
+      if (pos.left !== undefined) coinEl.style.left = pos.left + 'px';
+      if (pos.right !== undefined) coinEl.style.right = pos.right + 'px';
+      console.log('[Template] Coin display at:', pos.name);
+    } else {
+      coinEl.style.cssText = baseStyle;
+      coinEl.style.bottom = '80px';
+      coinEl.style.right = '10px';
+      coinEl.style.opacity = '0.7';
+      console.log('[Template] Fallback position');
+    }
+    
+    coinEl.innerHTML = '&#129689; <span id="gw-coin-value">0</span>';
+    
+    coinEl.addEventListener('click', function() {
+      var valueEl = document.getElementById('gw-coin-value');
+      if (valueEl) {
+        var current = valueEl.textContent;
+        coinEl.style.transform = 'scale(1.2)';
+        setTimeout(function() { coinEl.style.transform = 'scale(1)'; }, 200);
+        showToast('Koin: ' + current, 'info');
+      }
+    });
+    
+    document.body.appendChild(coinEl);
+    
+    try {
+      if (window.parent && window.parent !== window) {
+        setTimeout(function() {
+          try {
+            if (window.parent.Rewards && window.parent.Rewards.getState) {
+              var s = window.parent.Rewards.getState();
+              var v = document.getElementById('gw-coin-value');
+              if (v) v.textContent = s.balance || 0;
+            }
+          } catch(e) {}
+        }, 1500);
+      }
+    } catch(e) {}
+  }
+  
+  window.updateCoinDisplay = function(reward, newBalance) {
+    var valueEl = document.getElementById('gw-coin-value');
+    if (valueEl) {
+      if (newBalance !== undefined && newBalance !== null) {
+        valueEl.textContent = newBalance;
+      } else {
+        var c = parseInt(valueEl.textContent) || 0;
+        valueEl.textContent = c + (reward || 0);
+      }
+    }
+  };
+  
+  var _origAlert = window.alert;
+  window.alert = function(msg) {
+    try {
+      var lower = String(msg || '').toLowerCase();
+      if (lower.indexOf('menang') >= 0 || lower.indexOf('win') >= 0 || lower.indexOf('selamat') >= 0) {
+        playSound('win');
+        setTimeout(function() { window.claimGameReward(0, 0); }, 800);
+      } else if (lower.indexOf('kalah') >= 0 || lower.indexOf('lose') >= 0) {
+        playSound('lose');
+      }
+    } catch(e) {}
+    return _origAlert.apply(window, arguments);
+  };
+  
+  // Init - tunggu DOM ready
+  function initTemplate() {
+    var info = getUidAndToken();
+    console.log('[Game Template] UID:', info.uid ? 'yes' : 'no', 'Token:', info.token ? 'yes' : 'no');
+    
+    // Delay biar game selesai render
+    setTimeout(function() {
+      createCoinDisplay();
+      
+      // Re-check posisi setiap 3 detik (kalau game berubah)
+      setInterval(function() {
+        var coinEl = document.getElementById('gw-coin-display');
+        if (coinEl) {
+          var pos = findFreePosition();
+          if (pos) {
+            if (pos.top !== undefined) coinEl.style.top = pos.top + 'px'; else coinEl.style.top = '';
+            if (pos.bottom !== undefined) coinEl.style.bottom = pos.bottom + 'px'; else coinEl.style.bottom = '';
+            if (pos.left !== undefined) coinEl.style.left = pos.left + 'px'; else coinEl.style.left = '';
+            if (pos.right !== undefined) coinEl.style.right = pos.right + 'px'; else coinEl.style.right = '';
+          }
+        }
+      }, 3000);
+    }, 800);
+  }
+  
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initTemplate();
+  } else {
+    document.addEventListener('DOMContentLoaded', initTemplate);
+    window.addEventListener('load', initTemplate);
+  }
+  
+})();
+</script>
+<!-- END GAMING WORLD TEMPLATE -->
 </body>
 </html>
