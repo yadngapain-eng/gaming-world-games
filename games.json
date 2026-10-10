@@ -9,6 +9,16 @@
       "path": "monopoli-world-3d/",
       "active": true,
       "addedAt": "2026-10-09T10:24:34.284Z"
+    },
+    {
+      "id": "ludo-3d-fps",
+      "name": "Ludo 3d fps",
+      "icon": "🎲",
+      "description": "Ludo 3D FPS adalah versi tiga dimensi dari permainan Ludo klasik dengan perspektif orang pertama, di mana pemain menggerakkan pion mereka dalam arena 3D.",
+      "category": "action",
+      "path": "ludo-3d-fps/",
+      "active": true,
+      "addedAt": "2026-10-10T05:03:03.320Z"
     }
   ]
 }
