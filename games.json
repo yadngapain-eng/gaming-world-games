@@ -23,12 +23,12 @@
     {
       "id": "magic-chase",
       "name": "Magic chase",
-      "icon": "♟️",
-      "description": "Magic chase adalah permainan catur strategi di mana pemain mengendalikan pahlawan dengan kemampuan sihir untuk mengalahkan lawan dalam arena pertarungan.",
+      "icon": "🪄",
+      "description": "Magic chase adalah permainan strategi catur dengan elemen sihir, di mana pemain mengendalikan pahlawan untuk mengalahkan lawan di arena magis.",
       "category": "chess",
       "path": "magic-chase/",
       "active": true,
-      "addedAt": "2026-10-12T09:58:05.286Z"
+      "addedAt": "2026-10-12T10:01:20.668Z"
     }
   ]
 }
